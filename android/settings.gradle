@@ -1,0 +1,3 @@
+rootProject.name = 'PruebaScannerBeacons'
+
+include ':app'
