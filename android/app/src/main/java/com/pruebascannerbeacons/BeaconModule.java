@@ -8,9 +8,14 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.IllegalViewOperationException;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -24,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Set;
 
 
 public class BeaconModule extends ReactContextBaseJavaModule implements BeaconConsumer, RangeNotifier {
@@ -32,12 +37,13 @@ public class BeaconModule extends ReactContextBaseJavaModule implements BeaconCo
     private BeaconManager mBeaconManager;
     private Map<String, String> blueUp;
     private Context appContext;
-    
+    private Map<String , Double> prom;
 
     public BeaconModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
         blueUp = new HashMap<>();
+        prom = new HashMap<>();
         blueUp.put("0xacfd065e1a514932ac01", "BlueUp1");
         blueUp.put("0xacfd065e1a514932ac02", "BlueUp2");
         appContext = reactContext;
@@ -106,6 +112,7 @@ public class BeaconModule extends ReactContextBaseJavaModule implements BeaconCo
                 Beacon beacon = beacons.iterator().next();
                 if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x00) {
                     if (blueUp.containsKey(beacon.getId1().toString())) {
+                        prom.put(blueUp.get(beacon.getId1().toString()), beacon.getDistance());
                         Log.d("BEACON","El beacon " + blueUp.get(beacon.getId1().toString()) + " se encuentra a una distancia de "
                                 + beacon.getDistance() + " metros");
                     }
@@ -132,6 +139,27 @@ public class BeaconModule extends ReactContextBaseJavaModule implements BeaconCo
         Toast toast = Toast.makeText(getReactApplicationContext(), message, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
+    }
+
+    @ReactMethod
+    public void getBeaconsArray(Promise promise){
+        try{
+            WritableMap map = Arguments.createMap();
+            WritableArray x = Arguments.createArray();
+            WritableArray y = Arguments.createArray();
+            Set<String> aux = prom.keySet();
+            for(int i = 0; i < prom.size(); i++){
+                String beacon = aux.iterator().next();
+                x.pushString(beacon);
+                y.pushDouble(prom.get(beacon));
+            }
+            map.putArray("beacons", x);
+            map.putArray("distance", y);
+
+            promise.resolve(map);
+        }catch (IllegalViewOperationException e){
+            promise.reject("Promise error", e);
+        }
     }
 }
     

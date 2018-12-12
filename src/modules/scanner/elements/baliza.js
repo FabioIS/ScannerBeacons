@@ -12,11 +12,9 @@ export const Baliza = (Props) => {
     return(
         <View>
             <Text>
-                Este es mi texto :{text}
+                La baliza {text} está a una distancia de {id}.
             </Text>
-            <Text>
-                Este es mi id :{id}
-            </Text>
+
         </View>
     )
 

@@ -11,15 +11,31 @@ class Scanner extends Component {
     constructor(props) {
         super(props);
         this.state = {text: 1};
+        //setInterval(this.getBeaconsArray(), 2000)
     }
 
     rangeCounter = 0;
+    beacons = [];
+    distance = [];
 
     onClick() {
         console.log(this.state.text);
         this.textInput.clear();
         this.props.subsRange(this.state.text);
     }
+
+    async getBeaconsArray() {
+        try {
+            console.log("Timer funciona");
+            let {beacons, distance} = await NativeModules.BeaconModule.getBeaconsArray();
+            this.beacons = beacons;
+            this.distance = distance;
+            console.log("Beacons recibidos: " + this.beacons);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
 
     render() {
         return (
@@ -33,26 +49,46 @@ class Scanner extends Component {
                         )
                     })}
 
-                    <Button title="Click me"
-                            onPress={() => this.props.addRange(this.rangeCounter++, "hola" + this.rangeCounter)}
-                    />
+                    {setInterval(this.getBeaconsArray(), 2000)}
 
-                    <TextInput
-                        ref={input => {
-                            this.textInput = input
-                        }}
-                        placeholder={"Escribeme"}
-                        onChangeText={(text) => this.setState({text})}
 
-                    />
+                    {() => {
+                        console.log("Estamos");
+                        if (this.beacons.length !== 0 && this.distance.length !== 0) {
+                            console.log("size > 0");
+                            for (let i = 0; i < this.beacons.length; i++) {
+                                let x = i;
+                                return (
+                                    <View style={styles.point}>
+                                        <Baliza id={this.distance[x]} text={this.beacons[x]}/>
+                                    </View>
+                                )
+                            }
 
-                    <Button title="Delete"
-                            onPress={() => this.onClick()}
-                    />
+                        }
+                    }}
+
+
+                    {/*<Button title="Click me"*/}
+                    {/*onPress={() => this.props.addRange(this.rangeCounter++, "hola" + this.rangeCounter)}*/}
+                    {/*/>*/}
+
+                    {/*<TextInput*/}
+                    {/*ref={input => {*/}
+                    {/*this.textInput = input*/}
+                    {/*}}*/}
+                    {/*placeholder={"Escribeme"}*/}
+                    {/*onChangeText={(text) => this.setState({text})}*/}
+
+                    {/*/>*/}
+
+                    {/*<Button title="Delete"*/}
+                    {/*onPress={() => this.onClick()}*/}
+                    {/*/>*/}
                 </View>
                 <View style={styles.containerDown}>
 
-                   <Button title="Press me" onPress={() => NativeModules.BeaconModule.showToastMessage("Todo guay")}/>
+                    <Button title="Press me" onPress={() => NativeModules.BeaconModule.showToastMessage("Todo guay")}/>
                 </View>
             </View>
         );
@@ -67,13 +103,13 @@ class Scanner extends Component {
                 <View> */
 
 const styles = StyleSheet.create({
-    mainContainer:{
+    mainContainer: {
         flex: 1,
 
     },
     containerTop: {
         flex: 7,
-        backgroundColor:'blue' //'#c2e6e6'
+        backgroundColor: 'blue' //'#c2e6e6'
     },
     containerDown: {
         flex: 1,
