@@ -1,18 +1,16 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, Button, FlatList, TextInput} from 'react-native';
+import {StyleSheet, Text, View, Button, FlatList, TextInput, NativeModules} from 'react-native';
 import {Actions} from 'react-native-router-flux';
 import {connect} from "react-redux";
 import {addRange, subsRange} from "./actions/ScannerActions";
 import {Baliza} from "./elements/baliza"
 
-const EddystoneBeaconScanner = require('eddystone-beacon-scanner');
 
 class Scanner extends Component {
 
     constructor(props) {
         super(props);
         this.state = {text: 1};
-        EddystoneBeaconScanner.startScanning();
     }
 
     rangeCounter = 0;
@@ -54,14 +52,7 @@ class Scanner extends Component {
                 </View>
                 <View style={styles.containerDown}>
 
-                    {
-                        EddystoneBeaconScanner.onDiscover("found", function (beacon){
-                            console.log("Estamos guay");
-                            return(
-                                <Text>{beacon.distance}</Text>
-                            );
-                        })
-                    }
+                   <Button title="Press me" onPress={() => NativeModules.BeaconModule.showToastMessage("Todo guay")}/>
                 </View>
             </View>
         );
